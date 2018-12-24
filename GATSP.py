@@ -7,7 +7,7 @@ import random
 
 matplotlib.rcParams['font.family'] = 'STSong'
 
-# 载入数据
+# Load the data
 city_name = []
 city_condition = []
 with open('data.txt', 'r') as f:
@@ -19,11 +19,7 @@ with open('data.txt', 'r') as f:
         city_condition.append([float(line[1]), float(line[2])])
 city_condition = np.array(city_condition)
 
-# 展示地图
-# plt.scatter(city_condition[:,0],city_condition[:,1])
-# plt.show()
-
-# 距离矩阵
+# Distance matrix
 city_count = len(city_name)
 Distance = np.zeros([city_count, city_count])
 for i in range(city_count):
@@ -31,33 +27,29 @@ for i in range(city_count):
         Distance[i][j] = math.sqrt(
             (city_condition[i][0] - city_condition[j][0]) ** 2 + (city_condition[i][1] - city_condition[j][1]) ** 2)
 
-# 种群数
+# Population
 count = 300
-# 改良次数
+# Number of improvement
 improve_count = 10000
-# 进化次数
-itter_time = 3000
+# Number of evolution
+itter_time = 400
 
-# 设置强者的定义概率，即种群前30%为强者
+# Set the definition probability of the strong, that is, the first 30% of the population is the strong
 retain_rate = 0.3
 
-# 设置弱者的存活概率
+# Set the survival probability of the weak
 random_select_rate = 0.5
 
-# 变异率
+# The mutation rate
 mutation_rate = 0.1
 
-# 设置起点
+# Set the starting point
 origin = 15
 index = [i for i in range(city_count)]
 index.remove(15)
 
 
-# def get_path(x):
-#     graded = [[x[i], index[i]] for i in range(len(x))]
-#     graded_index = [t[1] for t in sorted(graded)]
-#     return graded_index
-# 总距离
+# The total distance
 def get_total_distance(x):
     distance = 0
     distance += Distance[origin][x[0]]
@@ -69,7 +61,7 @@ def get_total_distance(x):
     return distance
 
 
-# 改良
+# Improved
 def improve(x):
     i = 0
     distance = get_total_distance(x)
@@ -91,31 +83,27 @@ def improve(x):
         i += 1
 
 
-# 自然选择
+# Natural selection
 def selection(population):
-    """
-    选择
-    先对适应度从大到小排序，选出存活的染色体
-    再进行随机选择，选出适应度虽然小，但是幸存下来的个体
-    """
-    # 对总距离从小到大进行排序
+ 
+    # Sort the total distance from the smallest to the largest
     graded = [[get_total_distance(x), x] for x in population]
     graded = [x[1] for x in sorted(graded)]
-    # 选出适应性强的染色体
+    # Pick out the chromosomes that are resilient
     retain_length = int(len(graded) * retain_rate)
     parents = graded[:retain_length]
-    # 选出适应性不强，但是幸存的染色体
+    # Pick out the chromosomes that are less adaptable, but that survive
     for chromosome in graded[retain_length:]:
         if random.random() < random_select_rate:
             parents.append(chromosome)
     return parents
 
 
-# 交叉繁殖
+# Cross breeding
 def crossover(parents):
-    # 生成子代的个数,以此保证种群稳定
+    # The number of progeny generated to ensure population stability
     target_count = count - len(parents)
-    # 孩子列表
+    # The children list
     children = []
     while len(children) < target_count:
         male_index = random.randint(0, len(parents) - 1)
@@ -127,7 +115,7 @@ def crossover(parents):
             left = random.randint(0, len(male) - 2)
             right = random.randint(left + 1, len(male) - 1)
 
-            # 交叉片段
+            # Cross section
             gene1 = male[left:right]
             gene2 = female[left:right]
 
@@ -157,7 +145,7 @@ def crossover(parents):
     return children
 
 
-# 变异
+# Mutation
 def mutation(children):
     for i in range(len(children)):
         if random.random() < mutation_rate:
@@ -169,17 +157,17 @@ def mutation(children):
             child = child[0:u] + child[v:w] + child[u:v] + child[w:]
 
 
-# 得到最佳纯输出结果
+# Get the best pure output
 def get_result(population):
     graded = [[get_total_distance(x), x] for x in population]
     graded = sorted(graded)
     return graded[0][0], graded[0][1]
 
 
-# 使用改良圈算法初始化种群
+# The population was initialized using an improved loop algorithm
 population = []
 for i in range(count):
-    # 随机生成个体
+    # Randomly generated individuals
     x = index.copy()
     random.shuffle(x)
     improve(x)
@@ -189,13 +177,13 @@ register = []
 i = 0
 distance, result_path = get_result(population)
 while i < itter_time:
-    # 选择繁殖个体群
+    # Select breeding groups of individuals
     parents = selection(population)
-    # 交叉繁殖
+    # Cross breeding
     children = crossover(parents)
-    # 变异操作
+    # Mutation
     mutation(children)
-    # 更新种群
+    # Update the population
     population = parents + children
 
     distance, result_path = get_result(population)
@@ -216,5 +204,7 @@ for index in result_path:
 plt.plot(X, Y, '-o')
 plt.show()
 
+plt.xlabel("Number of iterations")
+plt.ylabel("Total moving distance")
 plt.plot(list(range(len(register))), register)
 plt.show()

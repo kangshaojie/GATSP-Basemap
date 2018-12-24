@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from mpl_toolkits.basemap import Basemap #%matplotlib inline
+from mpl_toolkits.basemap import Basemap 
 
 city_name = []
 city_condition = []
@@ -49,7 +49,7 @@ for i in list(range(0,31)):
         map.drawgreatcircle(start_lon, start_lat, end_lon, end_lat, linewidth=1, color = "red")
 
 
-# x是经度，y是纬度
+
 x, y = map(X, Y)
 map.scatter(x, y, marker='o', color='m')
 plt.savefig('./Result.png')
